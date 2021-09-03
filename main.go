@@ -61,7 +61,7 @@ func main() {
 
             fmt.Println(rotor_1);
 
-            if(enigma.SetRotorPositions([3] int{rotor_1, rotor_2, rotor_3}) == true) {
+            if(enigma.SetRotorPositions([]int{rotor_1, rotor_2, rotor_3}) == true) {
                 fmt.Println("Successfully changed rotors to [", rotor_1, ",", rotor_2, ",", rotor_3, "]");
             } else {
                 fmt.Println("Rotar selection [", rotor_1, ",", rotor_2, ",", rotor_3, "] is not valid.");
