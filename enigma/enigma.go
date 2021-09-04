@@ -84,7 +84,7 @@ func (enigma *enigma) GetRotorPositions() string {
     //TODO complete this once rotor position has been implemented
     var return_value = ""
     for _, rotor := range enigma.current_rotors {
-        return_value += strconv.Itoa(rotor) + "(A), "
+        return_value += strconv.Itoa(rotor) + "(" + string(convertNumber(enigma.rotors[rotor - 1].position + 1)) + "), "
     }
 
     //trim last 2 characters

@@ -4,6 +4,7 @@ import "bufio"
 import "os"
 import "fmt"
 import "unicode"
+import "strconv"
 import "example.com/enigma"
 import "github.com/manifoldco/promptui"
 
@@ -23,6 +24,7 @@ func main() {
     //enigma.TraceLetters(true)
 
     for {
+        fmt.Println()
         fmt.Println("Current settings: P[" + enigma.GetPlugboard() + "] R[" + enigma.GetRotorPositions() + "] R[" + enigma.GetReflector() + "]")
 
         prompt := promptui.Select{
@@ -38,6 +40,8 @@ func main() {
     	} else if(action == "Encrypt") {
             var encryption_string = getText("Text to encrypt")
 
+            fmt.Print("Encrypted text: ");
+
             for _, letter := range encryption_string {
                 if(unicode.IsLetter(letter)) {
                     fmt.Print(string(enigma.Encrypt(rune(letter))))
@@ -47,7 +51,7 @@ func main() {
             }
             fmt.Println()
         } else if(action == "Change Plugboard") {
-            var plugboard = rune(getText("Plugboard selection")[0])
+            var plugboard = unicode.ToUpper(rune(getText("Plugboard selection")[0]))
 
             if(enigma.SetPlugboard(plugboard) == true) {
                 fmt.Println("Successfully changed to plugboard", string(plugboard))
@@ -62,12 +66,12 @@ func main() {
             fmt.Println(rotor_1)
 
             if(enigma.SetRotorPositions([]int{rotor_1, rotor_2, rotor_3}) == true) {
-                fmt.Println("Successfully changed rotors to [", rotor_1, ",", rotor_2, ",", rotor_3, "]")
+                fmt.Println("Successfully changed rotors to [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "]")
             } else {
-                fmt.Println("Rotar selection [", rotor_1, ",", rotor_2, ",", rotor_3, "] is not valid.")
+                fmt.Println("Rotar selection [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "] is not valid.")
             }
         }  else if(action == "Change Reflector") {
-            var reflector = rune(getText("Reflector selection")[0])
+            var reflector = unicode.ToUpper(rune(getText("Reflector selection")[0]))
 
             if(enigma.SetReflector(reflector) == true) {
                 fmt.Println("Successfully changed to reflector", string(reflector))
