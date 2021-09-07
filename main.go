@@ -36,7 +36,7 @@ func main() {
         if(action == "Encrypt") {
             var encryption_string = getText("Text to encrypt")
 
-            fmt.Print("Encrypted text: ");
+            fmt.Print("Encrypted text:  ")
 
             for _, letter := range encryption_string {
                 if(unicode.IsLetter(letter)) {
@@ -74,11 +74,11 @@ func main() {
                         fmt.Println("Rotar order [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "] is not valid.")
                     }
                 } else if(rotor_action == "Change Rotor Positions") {
-                    var rotor_1 = rune(getText("Rotor 1 position")[0])
-                    var rotor_2 = rune(getText("Rotor 2 position")[0])
-                    var rotor_3 = rune(getText("Rotor 3 position")[0])
+                    var rotor_1 = unicode.ToUpper(rune(getText("Rotor 1 position")[0]))
+                    var rotor_2 = unicode.ToUpper(rune(getText("Rotor 2 position")[0]))
+                    var rotor_3 = unicode.ToUpper(rune(getText("Rotor 3 position")[0]))
 
-                    if(enigma.SetRotorPosition([]rune{rotor_1, rotor_2, rotor_3}) == true) {
+                    if(enigma.SetRotorPosition([]rune{rotor_3, rotor_2, rotor_1}) == true) {
                         fmt.Println("Successfully changed rotor positions to [" + string(rotor_1) + "," + string(rotor_2) + "," + string(rotor_3) + "]")
                     } else {
                         fmt.Println("Rotar position [" + string(rotor_1) + "," + string(rotor_2) + "," + string(rotor_3) + "] is not valid.")

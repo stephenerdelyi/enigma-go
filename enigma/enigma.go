@@ -95,9 +95,13 @@ func (enigma *enigma) SetRotorOrder(new_rotor_order []int) bool {
 
 func (enigma *enigma) SetRotorPosition(new_rotor_position []rune) bool {
     for index, rotor_position := range new_rotor_position {
+        if(!unicode.IsLetter(rotor_position)) {
+            return false
+        }
+        
         for {
-            if(convertNumber(enigma.getRotor(index).position) != rotor_position) {
-                enigma.incrementRotor(index + 1, false);
+            if(convertNumber(enigma.getRotor(len(enigma.current_rotors) - index).position) != rotor_position) {
+                enigma.incrementRotor(len(enigma.current_rotors) - index, false)
             } else {
                 break
             }
@@ -180,7 +184,7 @@ func (enigma *enigma) rotateRotorValues(rotor_position int) {
 func (enigma *enigma) incrementRotor(rotor_position int, check_knockpoint bool) {
     enigma.rotors[enigma.current_rotors[rotor_position - 1] - 1].position += 1
 
-    if(enigma.getRotor(rotor_position).position > 26) {
+    if(enigma.getRotor(rotor_position).position >= 26) {
         enigma.rotors[enigma.current_rotors[rotor_position - 1] - 1].position %= 26
     }
 
