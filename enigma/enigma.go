@@ -1,5 +1,4 @@
 package enigma
-import "fmt"
 import "unicode"
 import "strconv"
 
@@ -44,7 +43,7 @@ func convertLetter(letter rune) int {
 }
 
 func convertNumber(number int) rune {
-    return rune('A' - 1 + number)
+    return rune('A' + number)
 }
 
 func hasRune(needle rune, haystack []rune) bool {
@@ -70,21 +69,10 @@ func hasInt(needle int, haystack []int) bool {
 /////////////////////////////////////////////////////////////////
 // ENIGMA FUNCTIONS
 /////////////////////////////////////////////////////////////////
-func (enigma *enigma) TraceLetters(trace_letters bool) {
-    enigma.trace_letters = trace_letters
-}
-
-func (enigma enigma) trace(letter rune) {
-    if(enigma.trace_letters) {
-        fmt.Println(string(letter))
-    }
-}
-
 func (enigma *enigma) GetRotorPositions() string {
-    //TODO complete this once rotor position has been implemented
     var return_value = ""
-    for _, rotor := range enigma.current_rotors {
-        return_value += strconv.Itoa(rotor) + "(" + string(convertNumber(enigma.rotors[rotor - 1].position + 1)) + "), "
+    for i := len(enigma.current_rotors) - 1; i >= 0; i-- {
+        return_value += strconv.Itoa(enigma.current_rotors[i]) + "(" + string(convertNumber(enigma.rotors[enigma.current_rotors[i] - 1].position)) + "), "
     }
 
     //trim last 2 characters
@@ -93,14 +81,28 @@ func (enigma *enigma) GetRotorPositions() string {
     return return_value
 }
 
-func (enigma *enigma) SetRotorPositions(new_rotor_settings []int) bool {
-    for _, rotor_position := range new_rotor_settings {
+func (enigma *enigma) SetRotorOrder(new_rotor_order []int) bool {
+    for _, rotor_position := range new_rotor_order {
         if(!hasInt(rotor_position, enigma.available_rotors)) {
             return false
         }
     }
 
-    enigma.current_rotors = new_rotor_settings
+    enigma.current_rotors = new_rotor_order
+
+    return true
+}
+
+func (enigma *enigma) SetRotorPosition(new_rotor_position []rune) bool {
+    for index, rotor_position := range new_rotor_position {
+        for {
+            if(convertNumber(enigma.getRotor(index).position) != rotor_position) {
+                enigma.incrementRotor(index + 1, false);
+            } else {
+                break
+            }
+        }
+    }
 
     return true
 }
@@ -135,51 +137,73 @@ func (enigma enigma) passThroughPlugboard(letter rune) rune {
     return enigma.plugboards[convertLetter(enigma.current_plugboard)].plugboard[convertLetter(letter)]
 }
 
-func (enigma enigma) passThroughRotor(letter rune, rotor int) rune {
-    return enigma.rotors[rotor - 1].pins[convertLetter(letter)]
+func (enigma enigma) passThroughRotor(letter rune, rotor_position int) rune {
+    return enigma.getRotor(rotor_position).pins[convertLetter(letter)]
 }
 
 func (enigma enigma) passThroughReflector(letter rune) rune {
     return enigma.reflectors[convertLetter(enigma.current_reflector)].reflector[convertLetter(letter)]
 }
 
-func (enigma enigma) passThroughRotorReverse(letter rune, rotor int) rune {
-    for index, pin := range enigma.rotors[rotor - 1].pins {
+func (enigma enigma) passThroughRotorReverse(letter rune, rotor_position int) rune {
+    for index, pin := range enigma.getRotor(rotor_position).pins {
         if(pin == letter) {
-            return convertNumber(index + 1)
+            return convertNumber(index)
         }
     }
 
     return '0'
 }
 
-func (enigma *enigma) incrementRotor(step int) {
-    //TODO implement this
+func (enigma *enigma) getRotor(rotor_position int) rotor {
+    return enigma.rotors[enigma.current_rotors[rotor_position - 1] - 1]
+}
+
+func (enigma *enigma) rotateRotorValues(rotor_position int) {
+    var saved_first_letter = enigma.getRotor(rotor_position).pins[0]
+
+    for i := 0; i < 25; i++ {
+        enigma.getRotor(rotor_position).pins[i] = enigma.getRotor(rotor_position).pins[i + 1]
+    }
+
+    enigma.getRotor(rotor_position).pins[25] = saved_first_letter
+
+    for i := 0; i < 26; i++ {
+        if(enigma.getRotor(rotor_position).pins[i] != 'A') {
+            enigma.getRotor(rotor_position).pins[i] -= 1
+        } else {
+            enigma.getRotor(rotor_position).pins[i] = 'Z'
+        }
+    }
+}
+
+func (enigma *enigma) incrementRotor(rotor_position int, check_knockpoint bool) {
+    enigma.rotors[enigma.current_rotors[rotor_position - 1] - 1].position += 1
+
+    if(enigma.getRotor(rotor_position).position > 26) {
+        enigma.rotors[enigma.current_rotors[rotor_position - 1] - 1].position %= 26
+    }
+
+    enigma.rotateRotorValues(rotor_position)
+
+    if(enigma.getRotor(rotor_position).position == convertLetter(enigma.getRotor(rotor_position).knockpoint) && len(enigma.current_rotors) > rotor_position && check_knockpoint) {
+        enigma.incrementRotor(rotor_position + 1, true)
+    }
 }
 
 func (enigma enigma) Encrypt(letter rune) rune {
-    enigma.incrementRotor(1)
+    enigma.incrementRotor(1, true)
 
     letter = unicode.ToUpper(letter)
-    enigma.trace(letter)
     letter = enigma.passThroughPlugboard(letter)
-    enigma.trace(letter)
-    letter = enigma.passThroughRotor(letter, enigma.current_rotors[0])
-    enigma.trace(letter)
-    letter = enigma.passThroughRotor(letter, enigma.current_rotors[1])
-    enigma.trace(letter)
-    letter = enigma.passThroughRotor(letter, enigma.current_rotors[2])
-    enigma.trace(letter)
+    letter = enigma.passThroughRotor(letter, 1)
+    letter = enigma.passThroughRotor(letter, 2)
+    letter = enigma.passThroughRotor(letter, 3)
     letter = enigma.passThroughReflector(letter)
-    enigma.trace(letter)
-    letter = enigma.passThroughRotorReverse(letter, enigma.current_rotors[2])
-    enigma.trace(letter)
-    letter = enigma.passThroughRotorReverse(letter, enigma.current_rotors[1])
-    enigma.trace(letter)
-    letter = enigma.passThroughRotorReverse(letter, enigma.current_rotors[0])
-    enigma.trace(letter)
+    letter = enigma.passThroughRotorReverse(letter, 3)
+    letter = enigma.passThroughRotorReverse(letter, 2)
+    letter = enigma.passThroughRotorReverse(letter, 1)
     letter = enigma.passThroughPlugboard(letter)
-    enigma.trace(letter)
 
     return letter
 }
@@ -190,7 +214,6 @@ func Enigma() enigma {
         current_rotors: []int{1,2,3},
         current_reflector: 'A',
         current_plugboard: 'A',
-        trace_letters: false,
         //rotors, reflectors, plugboards
         available_rotors: []int{1,2,3},
         rotors: []rotor{

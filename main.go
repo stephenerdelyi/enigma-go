@@ -21,7 +21,6 @@ func getText(label string) string {
 
 func main() {
     enigma := enigma.Enigma()
-    //enigma.TraceLetters(true)
 
     for {
         fmt.Println()
@@ -32,12 +31,9 @@ func main() {
     		Items: []string{"Encrypt", "Change Plugboard", "Change Rotors", "Change Reflector", "Quit"},
     	}
 
-    	_, action, err := prompt.Run()
+    	_, action, _ := prompt.Run()
 
-        if err != nil {
-    		fmt.Printf("Prompt failed %v\n", err)
-    		return
-    	} else if(action == "Encrypt") {
+        if(action == "Encrypt") {
             var encryption_string = getText("Text to encrypt")
 
             fmt.Print("Encrypted text: ");
@@ -59,16 +55,37 @@ func main() {
                 fmt.Println("Plugboard", string(plugboard), "is not valid.")
             }
         } else if(action == "Change Rotors") {
-            var rotor_1 = int(getText("Rotor 1 selection")[0]) - 48
-            var rotor_2 = int(getText("Rotor 2 selection")[0]) - 48
-            var rotor_3 = int(getText("Rotor 3 selection")[0]) - 48
+            for {
+                rotor_prompt := promptui.Select{
+                    Label: "Select option",
+                    Items: []string{"Change Rotor Order", "Change Rotor Positions", "Back"},
+                }
 
-            fmt.Println(rotor_1)
+                _, rotor_action, _ := rotor_prompt.Run()
 
-            if(enigma.SetRotorPositions([]int{rotor_1, rotor_2, rotor_3}) == true) {
-                fmt.Println("Successfully changed rotors to [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "]")
-            } else {
-                fmt.Println("Rotar selection [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "] is not valid.")
+                if(rotor_action == "Change Rotor Order") {
+                    var rotor_1 = int(getText("Rotor 1 selection")[0]) - 48
+                    var rotor_2 = int(getText("Rotor 2 selection")[0]) - 48
+                    var rotor_3 = int(getText("Rotor 3 selection")[0]) - 48
+
+                    if(enigma.SetRotorOrder([]int{rotor_1, rotor_2, rotor_3}) == true) {
+                        fmt.Println("Successfully changed rotor order to [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "]")
+                    } else {
+                        fmt.Println("Rotar order [" + strconv.Itoa(rotor_1) + "," + strconv.Itoa(rotor_2) + "," + strconv.Itoa(rotor_3) + "] is not valid.")
+                    }
+                } else if(rotor_action == "Change Rotor Positions") {
+                    var rotor_1 = rune(getText("Rotor 1 position")[0])
+                    var rotor_2 = rune(getText("Rotor 2 position")[0])
+                    var rotor_3 = rune(getText("Rotor 3 position")[0])
+
+                    if(enigma.SetRotorPosition([]rune{rotor_1, rotor_2, rotor_3}) == true) {
+                        fmt.Println("Successfully changed rotor positions to [" + string(rotor_1) + "," + string(rotor_2) + "," + string(rotor_3) + "]")
+                    } else {
+                        fmt.Println("Rotar position [" + string(rotor_1) + "," + string(rotor_2) + "," + string(rotor_3) + "] is not valid.")
+                    }
+                } else {
+                    break
+                }
             }
         }  else if(action == "Change Reflector") {
             var reflector = unicode.ToUpper(rune(getText("Reflector selection")[0]))
