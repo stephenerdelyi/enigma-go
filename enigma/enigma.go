@@ -1,6 +1,5 @@
 package enigma
 import "unicode"
-import "strconv"
 
 /////////////////////////////////////////////////////////////////
 // STRUCTS
@@ -69,16 +68,20 @@ func hasInt(needle int, haystack []int) bool {
 /////////////////////////////////////////////////////////////////
 // ENIGMA FUNCTIONS
 /////////////////////////////////////////////////////////////////
-func (enigma *enigma) GetRotorPositions() string {
-    var return_value = ""
-    for i := len(enigma.current_rotors) - 1; i >= 0; i-- {
-        return_value += strconv.Itoa(enigma.current_rotors[i]) + "(" + string(convertNumber(enigma.rotors[enigma.current_rotors[i] - 1].position)) + "), "
+func (enigma *enigma) GetRotorOrder(rotor_position int) int {
+    if(rotor_position < 1 || rotor_position > 3) {
+        return '0'
     }
 
-    //trim last 2 characters
-    return_value = return_value[0:len(return_value) - 2]
+    return enigma.current_rotors[rotor_position - 1]
+}
 
-    return return_value
+func (enigma *enigma) GetRotorPosition(rotor_position int) rune {
+    if(rotor_position < 1 || rotor_position > 3) {
+        return '0'
+    }
+
+    return convertNumber(enigma.getRotor(rotor_position).position)
 }
 
 func (enigma *enigma) SetRotorOrder(new_rotor_order []int) bool {
@@ -98,7 +101,7 @@ func (enigma *enigma) SetRotorPosition(new_rotor_position []rune) bool {
         if(!unicode.IsLetter(rotor_position)) {
             return false
         }
-        
+
         for {
             if(convertNumber(enigma.getRotor(len(enigma.current_rotors) - index).position) != rotor_position) {
                 enigma.incrementRotor(len(enigma.current_rotors) - index, false)
