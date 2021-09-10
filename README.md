@@ -11,6 +11,7 @@ Creating a digital Enigma machine employs many challenges which I've found helpf
 ### Setup
 - Download the latest version of Go from [here](https://golang.org/dl/)
 - Clone the `enigma-go` repository from [Github](https://github.com/stephenerdelyi/enigma-go)
+- Inside the downloaded folder, run the project with `go run .`
 
 ### Using Enigma
 Enigma requires the exact same settings to be used at the start of encryption to ensure a correct cipher/decipher process. Settings are printed before each menu. The following settings can be configured:
@@ -21,6 +22,7 @@ Enigma requires the exact same settings to be used at the start of encryption to
  - Reflector (Options: A, B, C) - The current reflector used when encrypting.
 
 Settings are printed like such: `P[A] R[1(C), 2(B), 3(A)] R[B]`
+
 The above example shows an enigma using "plugboard A", with the right-most (first) rotor using "rotor 3" set in "position A", the middle (second) rotor using "rotor 2" set in "position B", the left-most (last) rotor using "rotor 1" set in "position C" and finally, "reflector B".
 
 Once you have memorized your chosen settings, you can use the "Encrypt" option to enter a string of characters [A-Z] which, upon pressing enter, will be encrypted using the machine. You will notice the only settings which change as a result of encryption are the rotor positions. If you copy the output to your clipboard, reset your rotor positions to the same settings prior to encrypting, and enter the encrypted text back into the "Encrypt" option, you will get your original message in plaintext. You've just encrypted your first message using enigma!
@@ -44,6 +46,7 @@ Volia! You can now easily encrypt text and switch back to your previous settings
 No program is ever perfect! Here's some future-phase considerations to take this from good to great:
  - Implement error checking at various stages
  - Switch from use of local enigma package to GitHub-hosted package
+ - Format function definitions with proper documentation (including @param and @return, etc).
  - All logic should be dynamic based on the hardware available. ie: allows infinite scalability of new rotors, plugboards and reflectors without the need to adjust getter/setter functions or the encryption process.
  - Move save settings functionality to its own package for a cleaner main.go file.
  - Use `getRotor` function when incrementing position in the `incrementRotor` function.
